@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/leominov/gitlab-runner-exec/git"
+	"github.com/xanzy/go-gitlab"
 )
 
 var (
@@ -46,6 +47,17 @@ func main() {
 	endpoint := fmt.Sprintf("%s://%s", u.Scheme, u.Hostname())
 	namespace := strings.TrimPrefix(u.Path, "/")
 	namespace = strings.TrimSuffix(namespace, ".git")
-	fmt.Println(endpoint)
-	fmt.Println(namespace)
+	gitlabCli := gitlab.NewClient(nil, os.Getenv("GITLAB_TOKEN"))
+	err = gitlabCli.SetBaseURL(endpoint)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	opts := &gitlab.GetProjectOptions{}
+	project, _, err := gitlabCli.Projects.GetProject(namespace, opts, nil)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	fmt.Println(project.NameWithNamespace)
 }

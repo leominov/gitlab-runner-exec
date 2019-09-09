@@ -1,1 +1,2 @@
-.gitlab-ci.yml
+/.gitlab-ci.yml
+/gitlab-runner-exec
