@@ -10,9 +10,8 @@ type Client struct {
 	cli *gitlab.Client
 }
 
-func NewClient(endpoint, token string) (*Client, error) {
-	gitlabCli := gitlab.NewClient(nil, token)
-	err := gitlabCli.SetBaseURL(endpoint)
+func NewClient(endpoint, username, password string) (*Client, error) {
+	gitlabCli, err := gitlab.NewBasicAuthClient(nil, endpoint, username, password)
 	if err != nil {
 		return nil, err
 	}

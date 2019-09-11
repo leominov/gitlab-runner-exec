@@ -46,7 +46,7 @@ func NewRunner(ciFile, wd, remote string) (*Runner, error) {
 	}
 	r.namespace = namespace
 	r.groups = GroupsFromNamespace(namespace)
-	gitlabCli, err := gitlab.NewClient(endpoint, os.Getenv("GITLAB_TOKEN"))
+	gitlabCli, err := gitlab.NewClient(endpoint, os.Getenv("GITLAB_LOGIN"), os.Getenv("GITLAB_PASSWORD"))
 	if err != nil {
 		return nil, err
 	}
