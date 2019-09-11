@@ -126,7 +126,7 @@ func (r *Runner) Exec(userArgs []string) error {
 		envVar := fmt.Sprintf("--env=%s=%q", k, v)
 		args = append(args, envVar)
 	}
-	logrus.Infof("Found variables: %d", len(vars))
+	logrus.WithField("src", "gitlab").Infof("Found variables: %d", len(vars))
 	cmd := exec.Command("gitlab-runner", args...)
 	cmd.Stderr = logrus.WithField("src", "cmd").WriterLevel(logrus.ErrorLevel)
 	cmd.Stdout = logrus.WithField("src", "cmd").WriterLevel(logrus.InfoLevel)
