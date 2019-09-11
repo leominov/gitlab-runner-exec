@@ -123,7 +123,7 @@ func (r *Runner) Exec(userArgs []string) error {
 	args := []string{"exec"}
 	args = append(args, userArgs...)
 	for k, v := range vars {
-		envVar := fmt.Sprintf("--env=%s=%s", k, v)
+		envVar := fmt.Sprintf("--env=%s=%q", k, v)
 		args = append(args, envVar)
 	}
 	logrus.Infof("Found variables: %d", len(vars))
