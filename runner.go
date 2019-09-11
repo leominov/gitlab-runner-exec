@@ -123,8 +123,8 @@ func (r *Runner) Exec(userArgs []string) error {
 	args := []string{"exec"}
 	args = append(args, userArgs...)
 	for k, v := range vars {
-		envVar := fmt.Sprintf("--env=%s=%q", k, v)
-		args = append(args, envVar)
+		env := fmt.Sprintf("%s=%s", k, v)
+		args = append(args, "--env", env)
 	}
 	logrus.WithField("src", "gitlab").Infof("Found variables: %d", len(vars))
 	cmd := exec.Command("gitlab-runner", args...)
