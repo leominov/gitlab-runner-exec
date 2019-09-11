@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 func CopyFile(src, dst string) (err error) {
@@ -55,4 +56,17 @@ func copyFileContents(src, dst string) (err error) {
 	}
 	err = out.Sync()
 	return
+}
+
+func GroupsFromNamespace(ns string) []string {
+	parts := strings.Split(ns, "/")
+	groups := []string{}
+	for index := 0; index < len(parts); index++ {
+		part := strings.Join(parts[0:index], "/")
+		if len(part) == 0 {
+			continue
+		}
+		groups = append(groups, part)
+	}
+	return groups
 }

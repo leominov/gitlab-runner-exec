@@ -2,18 +2,9 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"net/url"
 	"os"
-	"path"
-	"strings"
 
-	"github.com/leominov/gitlab-runner-exec/git"
-	"github.com/xanzy/go-gitlab"
-)
-
-const (
-	gitlabCIFile = ".gitlab-ci.yml"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -22,47 +13,22 @@ var (
 	remote     = flag.String("remote", "origin", "Repository remote name.")
 )
 
-func main() {
+func realMain() int {
 	flag.Parse()
-	gitCli, err := git.NewClient(*workDir)
+	runner, err := NewRunner(*ciFilename, *workDir, *remote)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		logrus.Error(err)
+		return 1
 	}
-	remote, err := gitCli.Remote(*remote)
+	defer runner.Close()
+	err = runner.Exec(flag.Args())
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		logrus.Error(err)
+		return 1
 	}
-	u, err := url.Parse(remote)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	tempDir := os.TempDir()
-	defer os.RemoveAll(tempDir)
-	src := path.Join(*workDir, *ciFilename)
-	dst := path.Join(tempDir, gitlabCIFile)
-	err = CopyFile(src, dst)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	endpoint := fmt.Sprintf("%s://%s", u.Scheme, u.Hostname())
-	namespace := strings.TrimPrefix(u.Path, "/")
-	namespace = strings.TrimSuffix(namespace, ".git")
-	gitlabCli := gitlab.NewClient(nil, os.Getenv("GITLAB_TOKEN"))
-	err = gitlabCli.SetBaseURL(endpoint)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	opts := &gitlab.GetProjectOptions{}
-	project, _, err := gitlabCli.Projects.GetProject(namespace, opts, nil)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	fmt.Println(project.Name)
-	fmt.Println(project.Namespace.FullPath)
+	return 0
+}
+
+func main() {
+	os.Exit(realMain())
 }
