@@ -5,7 +5,6 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path"
 	"strings"
 
 	"github.com/leominov/gitlab-runner-exec/git"
@@ -13,32 +12,24 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	gitlabCIFile = ".gitlab-ci.yml"
-)
-
 type Runner struct {
 	gitCli    *git.Client
 	gitlabCli *gitlab.Client
-	ciFile    string
 	workDir   string
-	tempDir   string
 	remote    string
 	namespace string
 	groups    []string
 }
 
-func NewRunner(ciFile, wd, remote string) (*Runner, error) {
+func NewRunner(wd, remote string) (*Runner, error) {
 	gitCli, err := git.NewClient(*workDir)
 	if err != nil {
 		return nil, err
 	}
 	r := &Runner{
 		gitCli:  gitCli,
-		ciFile:  ciFile,
 		workDir: wd,
 		remote:  remote,
-		tempDir: os.TempDir(),
 	}
 	endpoint, namespace, err := r.parseRemote()
 	if err != nil {
@@ -51,28 +42,7 @@ func NewRunner(ciFile, wd, remote string) (*Runner, error) {
 		return nil, err
 	}
 	r.gitlabCli = gitlabCli
-	err = r.prepareWorkspace()
-	if err != nil {
-		return nil, err
-	}
 	return r, nil
-}
-
-func (r *Runner) Close() error {
-	if len(r.tempDir) == 0 {
-		return nil
-	}
-	return os.RemoveAll(r.tempDir)
-}
-
-func (r *Runner) prepareWorkspace() error {
-	src := path.Join(r.workDir, r.ciFile)
-	dst := path.Join(r.tempDir, gitlabCIFile)
-	err := CopyFile(src, dst)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (r *Runner) parseRemote() (endpoint string, namespace string, err error) {
@@ -128,6 +98,7 @@ func (r *Runner) Exec(userArgs []string) error {
 	}
 	logrus.WithField("src", "gitlab").Infof("Found variables: %d", len(vars))
 	cmd := exec.Command("gitlab-runner", args...)
+	cmd.Dir = r.workDir
 	cmd.Stderr = logrus.WithField("src", "cmd").WriterLevel(logrus.ErrorLevel)
 	cmd.Stdout = logrus.WithField("src", "cmd").WriterLevel(logrus.InfoLevel)
 	return cmd.Run()
