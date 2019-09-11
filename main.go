@@ -12,8 +12,12 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
+const (
+	gitlabCIFile = ".gitlab-ci.yml"
+)
+
 var (
-	ciFilename = flag.String("ci", ".gitlab-ci.yml", "Gitlab CI configuration file.")
+	ciFilename = flag.String("ci", gitlabCIFile, "Gitlab CI configuration file.")
 	workDir    = flag.String("work-dir", "./", "Working directory.")
 	remote     = flag.String("remote", "origin", "Repository remote name.")
 )
@@ -38,7 +42,7 @@ func main() {
 	tempDir := os.TempDir()
 	defer os.RemoveAll(tempDir)
 	src := path.Join(*workDir, *ciFilename)
-	dst := path.Join(tempDir, src)
+	dst := path.Join(tempDir, gitlabCIFile)
 	err = CopyFile(src, dst)
 	if err != nil {
 		fmt.Println(err)
@@ -59,5 +63,6 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	fmt.Println(project.NameWithNamespace)
+	fmt.Println(project.Name)
+	fmt.Println(project.Namespace.FullPath)
 }
