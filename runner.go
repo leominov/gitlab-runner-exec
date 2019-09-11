@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/url"
-	"os"
 	"os/exec"
 	"strings"
 
@@ -21,7 +20,7 @@ type Runner struct {
 	groups    []string
 }
 
-func NewRunner(wd, remote string) (*Runner, error) {
+func NewRunner(wd, remote, login, password string) (*Runner, error) {
 	gitCli, err := git.NewClient(*workDir)
 	if err != nil {
 		return nil, err
@@ -37,7 +36,7 @@ func NewRunner(wd, remote string) (*Runner, error) {
 	}
 	r.namespace = namespace
 	r.groups = GroupsFromNamespace(namespace)
-	gitlabCli, err := gitlab.NewClient(endpoint, os.Getenv("GITLAB_LOGIN"), os.Getenv("GITLAB_PASSWORD"))
+	gitlabCli, err := gitlab.NewClient(endpoint, login, password)
 	if err != nil {
 		return nil, err
 	}
