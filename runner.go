@@ -20,7 +20,7 @@ type Runner struct {
 	groups    []string
 }
 
-func NewRunner(wd, remote, login, password string) (*Runner, error) {
+func NewRunner(wd, remote, username, password string) (*Runner, error) {
 	gitCli, err := git.NewClient(*workDir)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func NewRunner(wd, remote, login, password string) (*Runner, error) {
 	}
 	r.namespace = namespace
 	r.groups = GroupsFromNamespace(namespace)
-	gitlabCli, err := gitlab.NewClient(endpoint, login, password)
+	gitlabCli, err := gitlab.NewClient(endpoint, username, password)
 	if err != nil {
 		return nil, err
 	}

@@ -14,9 +14,9 @@ var (
 
 func realMain() int {
 	flag.Parse()
-	gitlabLogin := os.Getenv("GITLAB_LOGIN")
+	gitlabUsername := os.Getenv("GITLAB_USER")
 	gitlabPassword := os.Getenv("GITLAB_PASSWORD")
-	runner, err := NewRunner(*workDir, *remote, gitlabLogin, gitlabPassword)
+	runner, err := NewRunner(*workDir, *remote, gitlabUsername, gitlabPassword)
 	if err != nil {
 		logrus.Error(err)
 		return 1
