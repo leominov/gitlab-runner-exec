@@ -1,2 +1,5 @@
 /.gitlab-ci.yml
 /gitlab-runner-exec
+/coverage.txt
+/.build
+/.tarballs
