@@ -1,6 +1,6 @@
 # gitlab-runner-exec
 
-Run task locally with all of project variables from GitLab.
+Runs task locally with all of project variables from GitLab.
 
 ## Usage
 
