@@ -45,11 +45,7 @@ func NewRunner(wd, remote, username, password string) (*Runner, error) {
 }
 
 func (r *Runner) parseRemote() (endpoint string, namespace string, err error) {
-	gitCli, err := git.NewClient(*workDir)
-	if err != nil {
-		return
-	}
-	rm, err := gitCli.Remote(r.remote)
+	rm, err := r.gitCli.Remote(r.remote)
 	if err != nil {
 		return
 	}
