@@ -13,9 +13,12 @@ var (
 	workDir     = flag.String("work-dir", "./", "Working directory.")
 	remote      = flag.String("remote", "origin", "Repository remote name.")
 	showVersion = flag.Bool("version", false, "Prints version and exit.")
+	envs        ArrayFlags
 )
 
 func realMain() int {
+	flag.Var(&envs, "env", "Custom environment variables injected to build environment.")
+
 	flag.Parse()
 
 	if *showVersion {
@@ -32,7 +35,7 @@ func realMain() int {
 		return 1
 	}
 
-	err = runner.Exec(flag.Args())
+	err = runner.Exec(flag.Args(), envs.Map())
 	if err != nil {
 		logrus.Error(err)
 		return 1

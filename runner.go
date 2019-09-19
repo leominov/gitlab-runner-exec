@@ -12,23 +12,29 @@ import (
 )
 
 type Runner struct {
-	gitCli    *git.Client
-	gitlabCli *gitlab.Client
-	workDir   string
-	remote    string
-	namespace string
-	groups    []string
+	gitCli       *git.Client
+	gitlabCli    *gitlab.Client
+	runnerBinary string
+	workDir      string
+	remote       string
+	namespace    string
+	groups       []string
 }
 
 func NewRunner(wd, remote, username, password string) (*Runner, error) {
+	runnerBinary, err := exec.LookPath("gitlab-runner")
+	if err != nil {
+		return nil, err
+	}
 	gitCli, err := git.NewClient(*workDir)
 	if err != nil {
 		return nil, err
 	}
 	r := &Runner{
-		gitCli:  gitCli,
-		workDir: wd,
-		remote:  remote,
+		runnerBinary: runnerBinary,
+		gitCli:       gitCli,
+		workDir:      wd,
+		remote:       remote,
 	}
 	endpoint, namespace, err := r.parseRemote()
 	if err != nil {
@@ -80,19 +86,22 @@ func (r *Runner) getVariables() (map[string]string, error) {
 	return vars, nil
 }
 
-func (r *Runner) Exec(userArgs []string) error {
+func (r *Runner) Exec(userArgs []string, envs map[string]string) error {
 	vars, err := r.getVariables()
 	if err != nil {
 		return err
 	}
 	args := []string{"exec"}
 	args = append(args, userArgs...)
+	for k, v := range envs {
+		vars[k] = v
+	}
 	for k, v := range vars {
 		env := fmt.Sprintf("%s=%s", k, v)
 		args = append(args, "--env", env)
 	}
 	logrus.WithField("src", "gitlab").Infof("Found variables: %d", len(vars))
-	cmd := exec.Command("gitlab-runner", args...)
+	cmd := exec.Command(r.runnerBinary, args...)
 	cmd.Dir = r.workDir
 	cmd.Stderr = logrus.WithField("src", "cmd").WriterLevel(logrus.ErrorLevel)
 	cmd.Stdout = logrus.WithField("src", "cmd").WriterLevel(logrus.InfoLevel)

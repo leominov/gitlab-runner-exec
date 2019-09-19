@@ -7,6 +7,29 @@ import (
 	"strings"
 )
 
+type ArrayFlags []string
+
+func (a *ArrayFlags) String() string {
+	return "ArrayFlags"
+}
+
+func (a *ArrayFlags) Set(value string) error {
+	*a = append(*a, value)
+	return nil
+}
+
+func (a *ArrayFlags) Map() map[string]string {
+	result := make(map[string]string)
+	for _, v := range *a {
+		data := strings.Split(v, "=")
+		if len(data) != 2 {
+			continue
+		}
+		result[data[0]] = data[1]
+	}
+	return result
+}
+
 func CopyFile(src, dst string) (err error) {
 	sfi, err := os.Stat(src)
 	if err != nil {
