@@ -9,5 +9,5 @@ Before run check access for project and groups variables.
 ```shell
 export GITLAB_USER=USER
 export GITLAB_PASSWORD=PASSWORD
-gitlab-runner-exec docker lint
+gitlab-runner-exec --env=FOO=BAR docker lint
 ```
